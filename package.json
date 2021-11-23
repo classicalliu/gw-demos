@@ -2,5 +2,35 @@
   "name": "godwoken-demo",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "fmt": "prettier --write \"{src,tests}/**/*.ts\" package.json",
+    "lint": "eslint -c .eslintrc.js \"{src,tests}/**/*.ts\"",
+    "test": "ava tests/*.test.ts tests/**/*.test.ts"
+  },
+  "ava": {
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
+  },
+  "dependencies": {
+    "@ckb-lumos/base": "0.18.0-rc1",
+    "@ckb-lumos/config-manager": "0.18.0-rc1",
+    "@ckb-lumos/helpers": "0.18.0-rc1",
+    "ckb-js-toolkit": "0.10.2"
+  },
+  "devDependencies": {
+    "@ava/typescript": "^2.0.0",
+    "@types/node": "^16.10.3",
+    "@typescript-eslint/eslint-plugin": "^4.29.2",
+    "@typescript-eslint/parser": "^4.29.2",
+    "ava": "^3.15.0",
+    "eslint": "^7.32.0",
+    "prettier": "^2.3.2",
+    "ts-node": "^10.2.1",
+    "typescript": "4.3.5"
+  }
 }

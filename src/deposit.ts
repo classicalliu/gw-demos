@@ -30,7 +30,7 @@ export interface DepositLockArgs {
  * @param rollupTypeHash Rollup type hash, from godwoken config, see https://github.com/nervosnetwork/godwoken-public/blob/9b53469bff9d3a3632d87c99bfa1cd05a37871f9/testnet/config/config.toml#L23 for example
  * @param depositLockTypeHash Deposit lock type hash, from godwoken config, see https://github.com/nervosnetwork/godwoken-public/blob/9b53469bff/testnet/config/scripts-deploy-result.json#L13 for example
  * @param networkType testnet(AGGRON4 / devnet) OR mainnet(LINA), just to distinguish the CKB address format
- * @param cancelTimeout default to relative time, 2 days, see https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0017-tx-valid-since/0017-tx-valid-since.md for details.
+ * @param cancelTimeout default to relative timestamp, 20mins, see https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0017-tx-valid-since/0017-tx-valid-since.md for details.
  */
 export function ethAddressToCkbLockScript(
   ethAddress: HexString,
@@ -40,7 +40,7 @@ export function ethAddressToCkbLockScript(
   rollupTypeHash: Hash,
   depositLockTypeHash: Hash,
   networkType: "testnet" | "mainnet" = "testnet",
-  cancelTimeout: PackedSince = "0xc00000000002a300"
+  cancelTimeout: PackedSince = "0xc0000000000004b0"
 ): Cell {
   let config = predefined["AGGRON4"];
   if (networkType === "mainnet") {

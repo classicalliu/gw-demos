@@ -13,6 +13,8 @@ import { SerializeDepositLockArgs } from "../schemas";
 import { NormalizeDepositLockArgs } from "./normalizer";
 import { predefined } from "@ckb-lumos/config-manager";
 
+// https://github.com/nervosnetwork/godwoken/blob/v0.7.0-rc1/crates/types/schemas/godwoken.mol#L160
+// more molecule info: https://github.com/nervosnetwork/molecule
 export interface DepositLockArgs {
   owner_lock_hash: Hash;
   layer2_lock: Script;
@@ -24,11 +26,11 @@ export interface DepositLockArgs {
  * @param ethAddress ethereum eoa address
  * @param fromCkbAddress ckb address, CKBytes for deposit from which address
  * @param capacity CKB amount, unit in shannons
- * @param ethAccountTypeHash Eth account lock type hash, from godwoken config
- * @param rollupTypeHash Rollup type hash, from godwoken config
- * @param depositLockTypeHash Deposit lock type hash, from godwoken config
+ * @param ethAccountTypeHash Eth account lock type hash, from godwoken config, see https://github.com/nervosnetwork/godwoken-public/blob/9b53469bff/testnet/config/scripts-deploy-result.json#L83 for example
+ * @param rollupTypeHash Rollup type hash, from godwoken config, see https://github.com/nervosnetwork/godwoken-public/blob/9b53469bff9d3a3632d87c99bfa1cd05a37871f9/testnet/config/config.toml#L23 for example
+ * @param depositLockTypeHash Deposit lock type hash, from godwoken config, see https://github.com/nervosnetwork/godwoken-public/blob/9b53469bff/testnet/config/scripts-deploy-result.json#L13 for example
  * @param networkType testnet(AGGRON4 / devnet) OR mainnet(LINA), just to distinguish the CKB address format
- * @param cancelTimeout default to relative time, 2 days
+ * @param cancelTimeout default to relative time, 2 days, see https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0017-tx-valid-since/0017-tx-valid-since.md for details.
  */
 export function ethAddressToCkbLockScript(
   ethAddress: HexString,
@@ -46,9 +48,17 @@ export function ethAddressToCkbLockScript(
   }
 
   // ckb address => ckb lock script
+  // see https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0021-ckb-address-format/0021-ckb-address-format.md for more info
   const ownerLock: Script = parseAddress(fromCkbAddress, { config });
+
   // ckb lock script => ckb lock script hash
+  // compute script hash using blake2b with personalization = "ckb-default-hash"
+  // https://github.com/nervosnetwork/lumos/blob/v0.18.0-rc1/packages/base/lib/utils.js#L6-L36
+  // https://github.com/nervosnetwork/lumos/blob/v0.18.0-rc1/packages/base/lib/utils.js#L73-L81
+  // SerializeScript(normalizers.NormalizeScript(script)) is the way in TypeScript to serialize script with molecule.
   const ownerLockHash: Hash = utils.computeScriptHash(ownerLock);
+
+  // args = rollup type hash + eth address
   const layer2Lock: Script = {
     code_hash: ethAccountTypeHash,
     hash_type: "type",
@@ -68,15 +78,15 @@ export function ethAddressToCkbLockScript(
   console.log(`Godwoken script hash: ${l2ScriptHash}`);
   console.log("Godwoken script hash(160):", l2ScriptHash.slice(0, 42));
 
-  const serializedArgs: HexString = serializeArgs(
-    depositLockArgs,
-    rollupTypeHash
-  );
+  // Serialize DepositLockArgs with molecule(https://github.com/nervosnetwork/molecule) and get result with HexString format.
+  const depositLockArgsHexString: HexString = new Reader(
+    SerializeDepositLockArgs(NormalizeDepositLockArgs(depositLockArgs))
+  ).serializeJson();
 
   const depositLock: Script = {
     code_hash: depositLockTypeHash,
     hash_type: "type",
-    args: serializedArgs,
+    args: rollupTypeHash + depositLockArgsHexString.slice(2),
   };
 
   console.log("layer2 deposit lock:", depositLock);
@@ -92,39 +102,4 @@ export function ethAddressToCkbLockScript(
   console.log("layer1 output cell:", outputCell);
 
   return outputCell;
-}
-
-export function getDepositLockArgs(
-  ownerLockHash: Hash,
-  layer2_lock: Script,
-  cancelTimeout: PackedSince = "0xc00000000002a300"
-): DepositLockArgs {
-  const depositLockArgs: DepositLockArgs = {
-    owner_lock_hash: ownerLockHash,
-    layer2_lock: layer2_lock,
-    cancel_timeout: cancelTimeout, // relative timestamp, 2 days
-  };
-  return depositLockArgs;
-}
-
-/**
- * Serialize DepositLockArgs and concat with rollup type hash
- *
- * @param args
- * @param rollupTypeHash
- * @returns
- */
-export function serializeArgs(
-  args: DepositLockArgs,
-  rollupTypeHash: Hash
-): HexString {
-  const serializedDepositLockArgs: ArrayBuffer = SerializeDepositLockArgs(
-    NormalizeDepositLockArgs(args)
-  );
-
-  const depositLockArgsStr: HexString = new Reader(
-    serializedDepositLockArgs
-  ).serializeJson();
-
-  return rollupTypeHash + depositLockArgsStr.slice(2);
 }

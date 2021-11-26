@@ -9,5 +9,11 @@ yarn install
 ## Run deposit test
 
 ```bash
-yarn run test
+yarn run test:deposit
+```
+
+## Run withdrawal test
+
+```bash
+yarn run test:withdrawal
 ```

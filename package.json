@@ -6,7 +6,9 @@
   "scripts": {
     "fmt": "prettier --write \"{src,tests}/**/*.ts\" package.json",
     "lint": "eslint -c .eslintrc.js \"{src,tests}/**/*.ts\"",
-    "test": "ava tests/*.test.ts tests/**/*.test.ts"
+    "test": "ava tests/*.test.ts tests/**/*.test.ts",
+    "test:deposit": "ava tests/deposit.test.ts",
+    "test:withdrawal": "ava tests/withdrawal.test.ts"
   },
   "ava": {
     "extensions": [
@@ -20,11 +22,15 @@
     "@ckb-lumos/base": "0.18.0-rc1",
     "@ckb-lumos/config-manager": "0.18.0-rc1",
     "@ckb-lumos/helpers": "0.18.0-rc1",
-    "ckb-js-toolkit": "0.10.2"
+    "@ckb-lumos/hd": "0.18.0-rc1",
+    "ckb-js-toolkit": "0.10.2",
+    "keccak256": "^1.0.2",
+    "secp256k1": "^4.0.2"
   },
   "devDependencies": {
     "@ava/typescript": "^2.0.0",
     "@types/node": "^16.10.3",
+    "@types/secp256k1": "^4.0.3",
     "@typescript-eslint/eslint-plugin": "^4.29.2",
     "@typescript-eslint/parser": "^4.29.2",
     "ava": "^3.15.0",

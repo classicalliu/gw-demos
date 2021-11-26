@@ -186,3 +186,10 @@ export function NormalizeWithdrawalLockArgs(
     payment_lock_hash: normalizeRawData(32),
   });
 }
+
+export function NormalizeUnlockWithdrawalViaFinalize(
+  unlock_withdrawal_finalize: object,
+  { debugPath = "unlock_withdrawal_finalize" } = {}
+) {
+  return normalizeObject(debugPath, unlock_withdrawal_finalize, {});
+}

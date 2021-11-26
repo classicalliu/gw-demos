@@ -17,3 +17,9 @@ yarn run test:deposit
 ```bash
 yarn run test:withdrawal
 ```
+
+## Run unlock test
+
+```bash
+yarn run test:unlock
+```

@@ -25,7 +25,6 @@
     "@ckb-lumos/config-manager": "0.18.0-rc1",
     "@ckb-lumos/helpers": "0.18.0-rc1",
     "@ckb-lumos/hd": "0.18.0-rc1",
-    "@ckb-lumos/indexer": "0.18.0-rc1",
     "ckb-js-toolkit": "0.10.2",
     "keccak256": "^1.0.2",
     "secp256k1": "^4.0.2"

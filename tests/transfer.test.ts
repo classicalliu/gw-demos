@@ -74,7 +74,7 @@ test("generateTransactionMessage", (t) => {
 });
 
 test("ethTransactionToRawL2Transaction", async (t) => {
-  const abiItems = require("./fixtures/IERC20.json").abi;
+  const abiItems = require("./fixtures/SudtERC20Proxy.abi.json");
   const abi = new Abi(abiItems);
   const godwoker = new MockGodwoker("http://localhost:8888");
 

@@ -86,6 +86,79 @@ export async function unlock(
     });
   }
 
+  // That a transaction's unlock part
+  // Then will show how to generate a complete CKB transaction.
+  // txSkeleton should init with indexer, for lumos use indexer to search input cells
+  // Like this: let txSkeleton = TransactionSkeleton({ cellProvider: indexer })
+  // This transaction missed an input which input.lock = lockScript, and need to pay transaction fee
+  // Suppose `lockScript` is a secp256k1_blake160 lock
+  
+  // just fix outputs[0] (withdrawal output), avoid modify it by accident
+  // txSkeleton = txSkeleton.update("fixedEntries", (fixedEntries) => {
+  //   return fixedEntries.push({
+  //     field: "outputs",
+  //     index: 0,
+  //   });
+  // });
+
+  // find an input for pay fee (fee rate = 1000)
+  // convert `lockScript` to a CKB address `ckb_address`
+  // txSkeleton = await common.payFeeByFeeRate(
+  //   txSkeleton,
+  //   [ckb_address],
+  //   BigInt(1000)
+  // );
+
+  // That's the way to generate transaction message, sign message and convert TxSkeleton => Transaction by lumos
+  // txSkeleton = common.prepareSigningEntries(txSkeleton);
+  // const message: HexString = txSkeleton.get("signingEntries").get(0)!.message;
+  // import { key } from "@ckb-lumos/hd"
+  // const content: HexString = key.signRecoverable(message, privateKey);
+  // const tx = sealTransaction(txSkeleton, [content]);
+  
+
+
+  // Or add other parts by yourself.
+  //
+  // import { CellCollector } from "@ckb-lumos/common-scripts/lib/secp256k1_blake160";
+  // import { Indexer } from "@ckb-lumos/indexer"
+  // const indexer = new Indexer(...)
+  // const cellCollector = new CellCollector(
+  //   ckb_address,
+  //   indexer,
+  // )
+  // let secpInput = undefined
+  // for await (const cell of cellCollector.collect()) {
+  //   secpInput = cell;
+  //   break;
+  // }
+  // txSkeleton = txSkeleton
+  //   .update("inputs", (inputs) => {
+  //     return inputs.push(secpInput);
+  //   })
+  // if fee = 1000shannons
+  // const fee = 1000;
+  // Left new inputs capacity into withdrawal output
+  // txSkeleton = txSkeleton.update("outputs", outputs => {
+  //   const output = outputs.get(0)!;
+  //   output.cell_output.capacity = BigInt(withdrawalCell.cell_output.capacity) + BigInt(secpInput.cell_output.capacity) - fee
+  //   outputs = outputs.set(0, output);
+  //   return outputs;
+  // })
+  // 
+  // Add secp256k1 cell deps
+  // txSkeleton = txSkeleton.update("cellDeps", (cell_deps) => {
+  //   return cell_deps.push(secp256k1Blake160CellDep);
+  // })
+  //
+  // Remember to generate witnesses and convert to Transaction for submit
+  // txSkeleton = common.prepareSigningEntries(txSkeleton);
+  // const message: HexString = txSkeleton.get("signingEntries").get(0)!.message;
+  // import { key } from "@ckb-lumos/hd"
+  // const content: HexString = key.signRecoverable(message, privateKey);
+  // const tx = sealTransaction(txSkeleton, [content]);
+
+
   console.log("txSkeleton:", JSON.stringify(txSkeleton.toJS(), null, 2));
 
   let tx: Transaction = createTransactionFromSkeleton(txSkeleton);

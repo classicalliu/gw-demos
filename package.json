@@ -9,7 +9,8 @@
     "test": "ava tests/*.test.ts tests/**/*.test.ts",
     "test:deposit": "ava tests/deposit.test.ts",
     "test:withdrawal": "ava tests/withdrawal.test.ts",
-    "test:unlock": "ava tests/unlock.test.ts"
+    "test:unlock": "ava tests/unlock.test.ts",
+    "test:transfer": "ava tests/transfer.test.ts"
   },
   "ava": {
     "extensions": [
@@ -23,8 +24,9 @@
     "@ckb-lumos/base": "0.18.0-rc1",
     "@ckb-lumos/common-scripts": "0.18.0-rc1",
     "@ckb-lumos/config-manager": "0.18.0-rc1",
-    "@ckb-lumos/helpers": "0.18.0-rc1",
     "@ckb-lumos/hd": "0.18.0-rc1",
+    "@ckb-lumos/helpers": "0.18.0-rc1",
+    "@polyjuice-provider/base": "^0.1.0",
     "ckb-js-toolkit": "0.10.2",
     "keccak256": "^1.0.2",
     "secp256k1": "^4.0.2"

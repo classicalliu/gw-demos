@@ -23,3 +23,9 @@ yarn run test:withdrawal
 ```bash
 yarn run test:unlock
 ```
+
+## Run transfer test
+
+```bash
+yarn run test:transfer
+```

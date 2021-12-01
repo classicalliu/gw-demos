@@ -26,17 +26,17 @@ import { minimalCellCapacity } from "@ckb-lumos/helpers";
 /**
  *
  * @param godwokenClient Godwoken RPC client
- * @param rollupTypeHash
- * @param ethAccountTypeHash
+ * @param rollupTypeHash Rollup type hash, from godwoken config, see https://github.com/nervosnetwork/godwoken-public/blob/9b53469bff9d3a3632d87c99bfa1cd05a37871f9/testnet/config/config.toml#L23 for example
+ * @param ethAccountTypeHash Eth account lock type hash, from godwoken config, see https://github.com/nervosnetwork/godwoken-public/blob/9b53469bff/testnet/config/scripts-deploy-result.json#L83 for example
  * @param privateKey withdrawal account private key
- * @param ownerLockHash owner ckb account lock hash
+ * @param ownerLockHash owner ckb account lock hash, address -> lock script -> lock hash
  * @param capacity CKB capacity, unit in shannons
  * @param amount sUdt amount, fill with 0 if only withdraw CKB
  * @param sudtScriptHash l1 sudt script hash, fill with all-zeros for withdraw CKB
- * @param sellCapacity
- * @param sellAmount
- * @param paymentLockHash you can fill with paymentLockHash & sellCapacity & sellAmount, and means this paymentLockHash owner can pay sellCapacity & sellAmount to buy your withdrawal cell
- * @param feeSudtId sudt account id for pay fee, 0 for CKB
+ * @param sellCapacity see paymentLockHash
+ * @param sellAmount see paymentLockHash
+ * @param paymentLockHash default to all-zero hash, if you can fill with other lock hash, and means this paymentLockHash owner can pay sellCapacity & sellAmount to buy your withdrawal cell
+ * @param feeSudtId sudt account id for pay fee, 1 for CKB
  * @param feeAmount amount for fee
  * @returns
  */

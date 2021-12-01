@@ -10,7 +10,13 @@ import {
   Process,
   ProcessTransactionType,
   Abi,
+  RequireResult,
+  buildL2TransactionWithAddressMapping,
+  buildSerializeAddressMappingAbiItem,
+  decodeArgs,
+  formalizeEthToAddress,
 } from "@polyjuice-provider/base";
+import { AddressMappingItem } from "@polyjuice-provider/godwoken/lib/addressTypes";
 
 /**
  * Layer2 transaction => message
@@ -64,6 +70,116 @@ export async function ethTransactionToRawL2Transaction(
     },
   };
   const rawL2Tx = await buildProcess(abi, godwoker, ethTransaction, process);
+  if (typeof rawL2Tx === "string") {
+    throw new Error("rawL2Tx should not be string type.");
+  }
+  return rawL2Tx as RawL2Transaction;
+}
 
-  return rawL2Tx;
+/**
+ * for erc20 l2 transaction, the serialized data will be submit to web3 rpc poly_submitL2Transaction instead of gw_submitL2Transaction
+ * This method shows how to serialize a Godwoken-Polyjuice raw l2 transaction meets the poly_submitL2Transaction.
+ * the addressMapping is use for saving non-exist-yet eoa address in web3, you can get it from getAddressMapping() below
+ *
+ * @param abi
+ * @param godwoker
+ * @param rawL2Transaction
+ * @param signature: string,
+ * @param addressMappingVec: AddressMappingItem[]
+ * @returns
+ */
+export function serializePolyL2Transaction(
+  abi: Abi,
+  godwoker: Godwoker,
+  rawL2Transaction: RawL2Transaction,
+  signature: string,
+  addressMappingVec: AddressMappingItem[]
+) {
+  const { data } = decodeArgs(rawL2Transaction.args);
+  let serializedAbiItem = buildSerializeAddressMappingAbiItem(abi, data);
+  const l2Tx = {
+    raw: rawL2Transaction,
+    signature: signature,
+  };
+  const polyL2Tx = buildL2TransactionWithAddressMapping(
+    l2Tx,
+    addressMappingVec,
+    serializedAbiItem
+  );
+  return godwoker.serializeL2TransactionWithAddressMapping(polyL2Tx);
+}
+
+export async function getAddressMapping(
+  abi: Abi,
+  godwoker: Godwoker,
+  ethTransaction: EthTransaction
+) {
+  await godwoker.init();
+
+  let addressMappingItemVec: AddressMappingItem[] = [];
+  function setAddressMappingItemVec(
+    _addressMappingItemVec: AddressMappingItem[]
+  ) {
+    addressMappingItemVec = _addressMappingItemVec;
+  }
+
+  ethTransaction.from = ethTransaction.from || godwoker.default_from_address!;
+  await abi.refactor_data_with_short_address(
+    ethTransaction.data,
+    godwoker.getShortAddressByAllTypeEthAddress.bind(godwoker),
+    setAddressMappingItemVec
+  );
+  return addressMappingItemVec;
+}
+
+export async function estimateGas(
+  abi: Abi,
+  godwoker: Godwoker,
+  ethTransaction: EthTransaction
+) {
+  await godwoker.init();
+
+  ethTransaction.from = ethTransaction.from || godwoker.default_from_address!;
+  const dataWithShortAddress = await abi.refactor_data_with_short_address(
+    ethTransaction.data,
+    godwoker.getShortAddressByAllTypeEthAddress.bind(godwoker)
+  );
+
+  const ethTx = {
+    from: ethTransaction.from,
+    to: formalizeEthToAddress(ethTransaction.to),
+    value: ethTransaction.value,
+    data: dataWithShortAddress,
+  };
+
+  const gasHexNumber = await godwoker.jsonRPC(
+    "eth_estimateGas",
+    [ethTx],
+    "failed to call eth_estimateGas, result null.",
+    RequireResult.canNotBeEmpty
+  );
+  return gasHexNumber;
+}
+
+// a more simple method if you can provide a signingMethod callback function
+// the result of this function can be submit to godwoken network
+// through web3 rpc with `poly_submitL2Transaction` method
+export async function ethTransactionToSerializedPolyL2Transaction(
+  abi: Abi,
+  godwoker: Godwoker,
+  ethTransaction: EthTransaction,
+  signingMethod: (message: string) => string | Promise<string>
+) {
+  await godwoker.init();
+  const process: Process = {
+    type: ProcessTransactionType.send,
+    signingMethod: signingMethod,
+  };
+  const serializedPolyL2Transaction = await buildProcess(
+    abi,
+    godwoker,
+    ethTransaction,
+    process
+  );
+  return serializedPolyL2Transaction;
 }

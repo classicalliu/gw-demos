@@ -121,6 +121,9 @@ test("estimateGas", async (t) => {
   const abi = new Abi(abiItems);
   const godwoker = new Godwoker("http://godwoken-testnet-web3-rpc.ckbapp.dev");
 
+  // ERC20 call balanceOf method ethereum transaction
+  // the to address 0xb6CAAd292b0F0D035E04f39558e0AE04691598B5 is a godwoken-testnet erc20 proxy contract
+  // here we use this transaction to estimateGas from testnet.
   const testnetTransaction: EthTransaction = {
     from: "0xfb2c72d3ffe10ef7c9960272859a23d24db9e04a",
     to: "0xb6CAAd292b0F0D035E04f39558e0AE04691598B5",

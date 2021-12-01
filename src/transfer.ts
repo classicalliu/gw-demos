@@ -77,7 +77,7 @@ export async function ethTransactionToRawL2Transaction(
 }
 
 /**
- * for erc20 l2 transaction, the serialized data will be submit to web3 rpc poly_submitL2Transaction instead of gw_submitL2Transaction
+ * for erc20 l2 transaction, the serialized data will be submit to web3 rpc poly_submitL2Transaction instead of gw_submit_l2transaction
  * This method shows how to serialize a Godwoken-Polyjuice raw l2 transaction meets the poly_submitL2Transaction.
  * the addressMapping is use for saving non-exist-yet eoa address in web3, you can get it from getAddressMapping() below
  *

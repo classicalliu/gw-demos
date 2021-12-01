@@ -1,5 +1,5 @@
 import { RPC, Reader } from "ckb-js-toolkit";
-import { Hash, HexNumber } from "@ckb-lumos/base";
+import { Hash, HexNumber, HexString } from "@ckb-lumos/base";
 import { NormalizeWithdrawalRequest, WithdrawalRequest } from "./normalizer";
 import { SerializeWithdrawalRequest } from "../schemas";
 
@@ -42,6 +42,21 @@ export class GodwokenClient {
   ): Promise<HexNumber | undefined> {
     const id = await this.rpcCall("get_account_id_by_script_hash", scriptHash);
     return id;
+  }
+
+  /**
+   *
+   * @param shortAddress scriptHash160 (scriptHash first 20 bytes)
+   * @returns uint32
+   */
+  async getScriptHashByShortAddress(
+    shortAddress: HexString
+  ): Promise<Hash | undefined> {
+    const scriptHash = await this.rpcCall(
+      "get_script_hash_by_short_address",
+      shortAddress
+    );
+    return scriptHash;
   }
 
   /**

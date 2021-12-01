@@ -10,7 +10,8 @@
     "test:deposit": "ava tests/deposit.test.ts",
     "test:withdrawal": "ava tests/withdrawal.test.ts",
     "test:unlock": "ava tests/unlock.test.ts",
-    "test:transfer": "ava tests/transfer.test.ts"
+    "test:transfer": "ava tests/transfer.test.ts",
+    "test:address": "ava tests/address.test.ts"
   },
   "ava": {
     "extensions": [

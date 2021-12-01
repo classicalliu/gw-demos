@@ -29,3 +29,9 @@ yarn run test:unlock
 ```bash
 yarn run test:transfer
 ```
+
+## Run address test
+
+```bash
+yarn run test:address
+```

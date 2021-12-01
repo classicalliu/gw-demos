@@ -92,7 +92,7 @@ export async function unlock(
   // Like this: let txSkeleton = TransactionSkeleton({ cellProvider: indexer })
   // This transaction missed an input which input.lock = lockScript, and need to pay transaction fee
   // Suppose `lockScript` is a secp256k1_blake160 lock
-  
+
   // just fix outputs[0] (withdrawal output), avoid modify it by accident
   // txSkeleton = txSkeleton.update("fixedEntries", (fixedEntries) => {
   //   return fixedEntries.push({
@@ -115,8 +115,6 @@ export async function unlock(
   // import { key } from "@ckb-lumos/hd"
   // const content: HexString = key.signRecoverable(message, privateKey);
   // const tx = sealTransaction(txSkeleton, [content]);
-  
-
 
   // Or add other parts by yourself.
   //
@@ -145,7 +143,7 @@ export async function unlock(
   //   outputs = outputs.set(0, output);
   //   return outputs;
   // })
-  // 
+  //
   // Add secp256k1 cell deps
   // txSkeleton = txSkeleton.update("cellDeps", (cell_deps) => {
   //   return cell_deps.push(secp256k1Blake160CellDep);
@@ -157,7 +155,6 @@ export async function unlock(
   // import { key } from "@ckb-lumos/hd"
   // const content: HexString = key.signRecoverable(message, privateKey);
   // const tx = sealTransaction(txSkeleton, [content]);
-
 
   console.log("txSkeleton:", JSON.stringify(txSkeleton.toJS(), null, 2));
 

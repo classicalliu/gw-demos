@@ -4,6 +4,10 @@ import { RawL2Transaction } from "../src/normalizer";
 import {
   generateTransactionMessage,
   ethTransactionToRawL2Transaction,
+  estimateGas,
+  serializePolyL2Transaction,
+  getAddressMapping,
+  ethTransactionToSerializedPolyL2Transaction,
 } from "../src/transfer";
 import { signMessage } from "../src/helpers";
 import {
@@ -12,6 +16,7 @@ import {
   Godwoker,
   RequireResult,
 } from "@polyjuice-provider/base";
+import { AddressMappingItem } from "@polyjuice-provider/godwoken/lib/addressTypes";
 
 // ERC20 transfer ethereum transaction
 // From private key: 0xdd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b
@@ -45,6 +50,13 @@ const rawL2Transaction: RawL2Transaction = {
   nonce: "0xb",
 };
 
+const expectedMessage =
+  "0x2f10f2dadb07fae5d7305b2dac1138797194759345f1b2b5ffe899f7650324b2";
+const expectedSignature =
+  "0x545b30a4c3937134920ed276209b800504eb3c0e291903210176a7ce5d730af9531ef404fdfc0b43cf4c187ada1f1efe657f60db9ee780ed8d123ea9e63fce3601";
+const expectedSerializedPolyL2Transaction =
+  "0xf201000010000000fd00000011010000ed0000000c000000a80000009c00000014000000180000001c0000002000000006000000080000000b00000078000000ffffff504f4c5900808d5b0000000000010000000000000000000000000000000000000000000000000000000000000044000000a9059cbb00000000000000000000000007dd975da27b7aedf9f31e965ce68abf07c12d07000000000000000000000000000000000000000000000000000000000000001641000000545b30a4c3937134920ed276209b800504eb3c0e291903210176a7ce5d730af9531ef404fdfc0b43cf4c187ada1f1efe657f60db9ee780ed8d123ea9e63fce3601140000000c000000100000000000000004000000dd000000dd000000280000002800000028000000a7000000b3000000db000000db000000dc000000dd0000007f0000000c000000470000003b000000180000002500000030000000300000003000000009000000726563697069656e74070000006164647265737307000000616464726573733800000018000000220000002d0000002d0000002d00000006000000616d6f756e740700000075696e743235360700000075696e74323536080000007472616e73666572280000000800000020000000140000001800000020000000200000000000000004000000626f6f6c0204";
+
 test("generateTransactionMessage", (t) => {
   const senderScriptHash: Hash =
     "0xe26198694096599ad4c2e9610678bbef57757c019b9974b56e2589cf7a63cfcf";
@@ -52,9 +64,6 @@ test("generateTransactionMessage", (t) => {
     "0x12222c3a0c226d54812226812cad6f5d0703cc6238707789328f3a236517be31";
   const rollupTypeHash: Hash =
     "0x828b8a63f97e539ddc79e42fa62dac858c7a9da222d61fc80f0d61b44b5af5d4";
-
-  const expectedMessage =
-    "0x2f10f2dadb07fae5d7305b2dac1138797194759345f1b2b5ffe899f7650324b2";
 
   const message = generateTransactionMessage(
     rawL2Transaction,
@@ -64,8 +73,6 @@ test("generateTransactionMessage", (t) => {
   );
   t.is(message, expectedMessage);
 
-  const expectedSignature =
-    "0x545b30a4c3937134920ed276209b800504eb3c0e291903210176a7ce5d730af9531ef404fdfc0b43cf4c187ada1f1efe657f60db9ee780ed8d123ea9e63fce3601";
   const signature = signMessage(
     message,
     "0xdd50cac37ec6dd12539a968c1a2cbedda75bd8724f7bcad486548eaabb87fc8b"
@@ -85,6 +92,69 @@ test("ethTransactionToRawL2Transaction", async (t) => {
   );
 
   t.deepEqual(rawL2Tx, rawL2Transaction);
+});
+
+test("serializePolyL2Transaction", async (t) => {
+  const abiItems = require("./fixtures/SudtERC20Proxy.abi.json");
+  const abi = new Abi(abiItems);
+  const godwoker = new MockGodwoker("http://localhost:8888");
+
+  const signature =
+    "0x545b30a4c3937134920ed276209b800504eb3c0e291903210176a7ce5d730af9531ef404fdfc0b43cf4c187ada1f1efe657f60db9ee780ed8d123ea9e63fce3601";
+  const addressMappingVec: AddressMappingItem[] = await getAddressMapping(
+    abi,
+    godwoker,
+    ethTransaction
+  );
+  const serializeData = serializePolyL2Transaction(
+    abi,
+    godwoker,
+    rawL2Transaction,
+    signature,
+    addressMappingVec
+  );
+  t.is(serializeData, expectedSerializedPolyL2Transaction);
+});
+
+test("estimateGas", async (t) => {
+  const abiItems = require("./fixtures/SudtERC20Proxy.abi.json");
+  const abi = new Abi(abiItems);
+  const godwoker = new Godwoker("http://godwoken-testnet-web3-rpc.ckbapp.dev");
+
+  // ERC20 call balanceOf method ethereum transaction
+  // the to address 0xb6CAAd292b0F0D035E04f39558e0AE04691598B5 is a godwoken-testnet erc20 proxy contract
+  // here we use this transaction to estimateGas from testnet.
+  const testnetTransaction: EthTransaction = {
+    from: "0xfb2c72d3ffe10ef7c9960272859a23d24db9e04a",
+    to: "0xb6CAAd292b0F0D035E04f39558e0AE04691598B5",
+    gasPrice: "0x0",
+    data: "0x70a0823100000000000000000000000094b79e76aa812fb5f9c53583d906581d395ad290",
+    value: "0x0",
+  };
+  const gasHexNumber = await estimateGas(abi, godwoker, testnetTransaction);
+  const expectedGasHexNumber = "0xaa3";
+  t.is(gasHexNumber, expectedGasHexNumber);
+});
+
+test("ethTransactionToSerializedPolyL2Transaction", async (t) => {
+  const abiItems = require("./fixtures/SudtERC20Proxy.abi.json");
+  const abi = new Abi(abiItems);
+  const godwoker = new MockGodwoker("http://localhost:8888");
+
+  const signingMethod = (message: string) => {
+    if (message === expectedMessage) {
+      return expectedSignature;
+    }
+    throw new Error("message is wrong!");
+  };
+
+  const serializeData = await ethTransactionToSerializedPolyL2Transaction(
+    abi,
+    godwoker,
+    ethTransaction,
+    signingMethod
+  );
+  t.is(serializeData, expectedSerializedPolyL2Transaction);
 });
 
 /**

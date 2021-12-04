@@ -51,9 +51,6 @@ export async function privateKeyToAccountId(
   return id;
 }
 
-/**
- * Ethereum personal sign
- */
 export function signMessage(message: Hash, privateKey: HexString): HexString {
   const signObject = secp256k1.ecdsaSign(
     new Uint8Array(new Reader(message).toArrayBuffer()),

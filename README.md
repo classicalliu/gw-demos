@@ -35,3 +35,9 @@ yarn run test:transfer
 ```bash
 yarn run test:address
 ```
+
+## Run adjust-fee-rate
+
+```bash
+yarn run test:adjust-fee-rate
+```

@@ -2,6 +2,7 @@ import { RPC, Reader } from "ckb-js-toolkit";
 import { Hash, HexNumber, HexString } from "@ckb-lumos/base";
 import { NormalizeWithdrawalRequest, WithdrawalRequest } from "./normalizer";
 import { SerializeWithdrawalRequest } from "../schemas";
+import { FeeConfig } from "./types";
 
 /**
  * Godwoken RPC client
@@ -76,5 +77,9 @@ export class GodwokenClient {
    */
   async getScriptHash(accountId: HexNumber): Promise<Hash> {
     return await this.rpcCall("get_script_hash", accountId);
+  }
+
+  async getFeeConfig(): Promise<FeeConfig> {
+    return await this.rpcCall("get_fee_config");
   }
 }

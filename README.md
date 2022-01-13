@@ -41,3 +41,9 @@ yarn run test:address
 ```bash
 yarn run test:adjust-fee-rate
 ```
+
+## Run create-eoa-account
+
+```bash
+yarn run test:create-eoa-account
+```

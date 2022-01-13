@@ -227,3 +227,18 @@ export function NormalizeL2Transaction(
     signature: normalizeRawData(-1),
   });
 }
+
+export interface CreateAccount {
+  script: Script;
+  fee: Fee;
+}
+
+export function NormalizeCreateAccount(
+  createAccount: CreateAccount,
+  { debugPath = "create_account" } = {}
+) {
+  return normalizeObject(debugPath, createAccount, {
+    script: toNormalize(normalizers.NormalizeScript),
+    fee: toNormalize(NormalizeFee),
+  });
+}
